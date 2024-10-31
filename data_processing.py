@@ -76,18 +76,42 @@ def filter(condition, dict_list):
             filtered_list.append(item)
     return filtered_list
 
-
-x = filter(lambda x: float(x['latitude']) >= 60.0, cities)
-for item in x:
-    print(item)
-
+# x = filter(lambda _x: _x['country'] == 'Italy', cities)
+# print(x)
+# for item in x:
+#     print(item)
 
 # Let's write a function to do aggregation given an aggregation function and an aggregation key
+# function what you want to do find max , average , etc.
+# key what you what to search temp ....
 def aggregate(aggregation_key, aggregation_function, dict_list):
-    pass
+    aggr_value = {}
+    for item in dict_list :
+        aggr_value[item['city']] = item[aggregation_key]
+    if aggregation_function is not None:
+        aggr_value = aggregation_function(aggr_value)
+    return aggr_value
 
 # Let's write code to
+_Italy = filter(lambda _x: _x['country'] == 'Italy', cities)
+_Sweden = filter(lambda _x: _x['country'] == 'Sweden', cities)
+
 # - print the average temperature for all the cities in Italy
+avg_Italy = aggregate('temperature', None, _Italy)
+for items,value in avg_Italy.items():
+    print('temperature of',items ,'in Italy is ',value  )
+print()
+
 # - print the average temperature for all the cities in Sweden
+avg_Sweden = aggregate('temperature', None, _Sweden)
+for items,value in avg_Sweden.items():
+    print('temperature of',items ,'in Sweden is ',value  )
+print()
+
 # - print the min temperature for all the cities in Italy
+min_Italy = aggregate('temperature', lambda x: min(x.values()) , _Italy)
+print(f"min temperature in Italy is {min_Italy}"+'\n')
+
 # - print the max temperature for all the cities in Sweden
+max_Sweden = aggregate('temperature', lambda x: max(x.values()) , _Sweden)
+print(f"max temperature in Sweden in {max_Sweden}")
