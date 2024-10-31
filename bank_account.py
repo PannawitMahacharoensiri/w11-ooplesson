@@ -19,7 +19,16 @@ class AccountDB:
         for account in self.account_database:
             if account.account_number == account_num:
                 return account
-        return None
+        return Account("9999", "", "", 0)
+
+
+    def delete(self, account):
+        index = self.__search_private(account.account_number)
+        if index ==  '9999':
+            print(account, "Not exist")
+        else :
+            del account
+
 
     def __str__(self):
         s = ''
@@ -36,11 +45,15 @@ class Account:
         self.balance = balance
 
     def deposit(self, amount):
-        self.balance += amount
+        if self == -1 :
+            print("Cannot deposit")
+        else :
+            self.balance += amount
 
     def withdraw(self, amount):
         if self.balance >= amount:
             self.balance -= amount
+
 
     def __str__(self):
         return '{' + str(self.account_number) + ',' + str(self.type) + ',' + str(self.account_name) + ',' + str(
@@ -59,6 +72,7 @@ my_account_DB.insert(account3)
 my_account_DB.insert(account4)
 my_account_DB.insert(account5)
 print(my_account_DB)
+my_account_DB.delete(account5)
 my_account_DB.search_public("0003").deposit(50)
 print(my_account_DB)
 my_account_DB.search_public("0003").withdraw(100)
