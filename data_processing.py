@@ -1,117 +1,118 @@
-import csv, os
+"""
+Objective : build program that build table(list and dict) from CSV file
+then put it in another table call class TableDB
 
+class Table
+> whole list that come from CSV file
+- represent CSV file
+- filter out not want data
+> state variable :
+    1.row
+    2.line
+
+class TableDB:
+- collect Table
+> attribute
+    1. list
+"""
+#transfer CSV to list file
+import csv, os
 __location__ = os.path.realpath(
     os.path.join(os.getcwd(), os.path.dirname(__file__)))
-
 cities = []
 with open(os.path.join(__location__, 'Cities.csv')) as f:
     rows = csv.DictReader(f)
     for r in rows:
         cities.append(dict(r))
-
 countries = []
 with open(os.path.join(__location__, 'Countries.csv')) as f:
     rows = csv.DictReader(f)
     for r in rows:
         countries.append(dict(r))
 
-# Print the average temperature of all the cities
-print("The average temperature of all the cities:")
-temps = []
-for city in cities:
-    temps.append(float(city['temperature']))
-print(sum(temps) / len(temps))
-print()
+class TableDB:
+    def __init__(self):
+        self.databased = []
+    def insert(self, table:object):
+        if not isinstance(table ,Table):
+            raise TypeError
+        self.databased.append(table)
+    def search(self, table_name):
+        answer = None
+        for items in self.databased:
+            if items.table_name == table_name :
+                answer = items
+        return answer
 
-# Print all cities in Italy
-cities_temp = []
-my_country = 'Italy'
-for city in cities:
-    if city['country'] == my_country:
-        cities_temp.append(city['city'])
-print("All the cities in", my_country, ":")
-print(cities_temp)
-print()
+class Table:
+    def __init__(self, table_name = 'table', table = []):
+        self.table_name = table_name
+        self.table = table
+    def filter(self, condition):
+        filter_list = []
+        for item in self.table:
+            if condition(item):
+                filter_list.append(item)
+        return filter_list
+    def aggregate(self, aggregation_function, aggregation_key):
+        aggr_value = {}
+        for item in self.table:
+            aggr_value[item['city']] = item[aggregation_key]
+        if aggregation_function is not None:
+            aggr_value = aggregation_function(aggr_value)
+        return aggr_value
+    def read_value(self, say, say2):
+        if type(self.table) == dict:
+            for items,value in self.table.items() :
+                print(f"{say} of {items:<10} in {say2} is {value}  ")
+    def __str__(self):
+        return f"{self.table}\n"
+    def __repr__(self):
+        return self.__str__()
 
-# Print the average temperature for all the cities in Italy
-# Write code for me
-temps = []
-my_country = 'Italy'
-for city in cities:
-    if city['country'] == my_country:
-        temps.append(float(city['temperature']))
-print("The average temperature of all the cities in", my_country, ":")
-print(sum(temps) / len(temps))
-print()
+# Change to OOP format and contain in DB
+cities_oop = Table("cities", cities)
+countries_oop = Table("countries", countries)
+DB = TableDB()
+DB.insert(cities_oop)
+DB.insert(countries_oop)
 
-# Print the max temperature for all the cities in Italy
-# Write code for me
-temps = []
-my_country = 'Italy'
-for city in cities:
-    if city['country'] == my_country:
-        temps.append(float(city['temperature']))
-print("The max temperature of all the cities in", my_country, ":")
-print(max(temps))
-print()
+# Build separate Table for each interested country
+Italy_all_info = cities_oop.filter(lambda _x: _x['country'] == 'Italy')
+Sweden_all_info = cities_oop.filter(lambda _x: _x['country'] == 'Sweden')
+Italy = Table("Italy", Italy_all_info)
+Sweden = Table("Sweden", Sweden_all_info)
+DB.insert(Italy)
+DB.insert(Sweden)
 
-# Print the min temperature for all the cities in Italy
-# Write code for me
-temps = []
-my_country = 'Italy'
-for city in cities:
-    if city['country'] == my_country:
-        temps.append(float(city['temperature']))
-print("The min temperature of all the cities in", my_country, ":")
-print(min(temps))
-print()
+## aggregate only temperature
+# Build and store all temperature of cities in Italy
+operate = DB.search("Italy")
+list_temp_Italy = operate.aggregate(aggregation_function = None, aggregation_key = "temperature")
+temp_Italy = Table("temperature_Italy", list_temp_Italy)
+DB.insert(temp_Italy)
+# Build and store all temperature of cities in Sweden
+operate = DB.search("Sweden")
+list_temp_Sweden = operate.aggregate(aggregation_function = None, aggregation_key = "temperature")
+temp_Sweden = Table("temperature_Sweden", list_temp_Sweden)
+DB.insert(temp_Sweden)
 
-
-# Let's write a function to filter out only items that meet the condition
-# Hint: condition will be associated with an anonymous function, e.x., lamdbda x: max(x)
-def filter(condition, dict_list):
-    filtered_list = []
-    for item in dict_list:
-        if condition(item):
-            filtered_list.append(item)
-    return filtered_list
-
-# x = filter(lambda _x: _x['country'] == 'Italy', cities)
-# print(x)
-# for item in x:
-#     print(item)
-
-# Let's write a function to do aggregation given an aggregation function and an aggregation key
-# function what you want to do find max , average , etc.
-# key what you what to search temp ....
-def aggregate(aggregation_key, aggregation_function, dict_list):
-    aggr_value = {}
-    for item in dict_list :
-        aggr_value[item['city']] = item[aggregation_key]
-    if aggregation_function is not None:
-        aggr_value = aggregation_function(aggr_value)
-    return aggr_value
-
-# Let's write code to
-_Italy = filter(lambda _x: _x['country'] == 'Italy', cities)
-_Sweden = filter(lambda _x: _x['country'] == 'Sweden', cities)
 
 # - print the average temperature for all the cities in Italy
-avg_Italy = aggregate('temperature', None, _Italy)
-for items,value in avg_Italy.items():
-    print('temperature of',items ,'in Italy is ',value  )
+print("the average temperature for all the cities in Italy")
+operate = DB.search("temperature_Italy")
+operate.read_value("temperature", "Italy")
 print()
-
 # - print the average temperature for all the cities in Sweden
-avg_Sweden = aggregate('temperature', None, _Sweden)
-for items,value in avg_Sweden.items():
-    print('temperature of',items ,'in Sweden is ',value  )
+print("the average temperature for all the cities in Sweden")
+operate = DB.search("temperature_Sweden")
+operate.read_value("temperature", "Sweden")
 print()
-
 # - print the min temperature for all the cities in Italy
-min_Italy = aggregate('temperature', lambda x: min(x.values()) , _Italy)
-print(f"min temperature in Italy is {min_Italy}"+'\n')
-
+operate = DB.search("Italy")
+min_temp_Italy = operate.aggregate(aggregation_function = lambda x: min(x.values()), aggregation_key = "temperature")
+print(f"min temperature in Italy is {min_temp_Italy}")
 # - print the max temperature for all the cities in Sweden
-max_Sweden = aggregate('temperature', lambda x: max(x.values()) , _Sweden)
-print(f"max temperature in Sweden in {max_Sweden}")
+operate = DB.search("Sweden")
+max_temp_Sweden = operate.aggregate(aggregation_function = lambda x: max(x.values()), aggregation_key = "temperature")
+print(f"max temperature in Sweden in {max_temp_Sweden}")
